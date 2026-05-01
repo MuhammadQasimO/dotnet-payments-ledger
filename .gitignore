@@ -1,0 +1,49 @@
+# Build outputs
+bin/
+obj/
+out/
+artifacts/
+**/[Pp]ublish/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.swp
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+# Rider
+_ReSharper.Caches/
+*.DotSettings.user
+
+# Dotnet
+project.lock.json
+*.nuget.props
+*.nuget.targets
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+**/secrets.json
+
+# Docker
+.dockerignore.local
