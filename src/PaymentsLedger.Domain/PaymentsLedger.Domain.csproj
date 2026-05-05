@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PaymentsLedger.Domain</RootNamespace>
+    <AssemblyName>PaymentsLedger.Domain</AssemblyName>
+    <Description>Pure domain layer for the payments ledger. Zero framework dependencies.</Description>
+  </PropertyGroup>
+
+</Project>
