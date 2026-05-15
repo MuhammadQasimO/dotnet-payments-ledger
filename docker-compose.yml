@@ -1,0 +1,50 @@
+name: payments-ledger
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ledger
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ledger"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: payments-ledger-api:local
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      AutoMigrate: "true"
+      ConnectionStrings__Ledger: "Host=postgres;Port=5432;Database=ledger;Username=postgres;Password=postgres;Include Error Detail=true"
+      ConnectionStrings__Redis: "redis:6379"
+      Webhooks__SharedSecret: "dev-secret"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
