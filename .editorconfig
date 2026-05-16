@@ -57,3 +57,9 @@ dotnet_diagnostic.CA1305.severity = none      # Specify IFormatProvider (Money i
 dotnet_diagnostic.CA1310.severity = none      # StringComparison overload (Ordinal is the project default)
 dotnet_diagnostic.CA1054.severity = none      # URI parameter instead of string
 dotnet_diagnostic.CA1056.severity = none      # URI property instead of string
+
+# EF-generated migrations: tooling output, not hand-authored. Allow what EF emits.
+[**/Migrations/*.cs]
+generated_code = true
+charset = utf-8-bom
+dotnet_diagnostic.IDE0161.severity = none

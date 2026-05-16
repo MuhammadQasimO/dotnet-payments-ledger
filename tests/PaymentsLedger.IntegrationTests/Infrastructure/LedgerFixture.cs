@@ -33,9 +33,18 @@ public sealed class LedgerFixture : IAsyncLifetime
     {
         await _postgres.StartAsync();
         await _redis.StartAsync();
-        Factory = new PaymentsLedgerFactory(
-            _postgres.GetConnectionString(),
-            _redis.GetConnectionString());
+
+        // Inject via process env vars: WebApplicationBuilder reads them eagerly during
+        // CreateBuilder, so AddInfrastructure() sees the connection strings. A test-side
+        // ConfigureAppConfiguration overlay would arrive after DI has already been wired.
+        Environment.SetEnvironmentVariable("ConnectionStrings__Ledger", _postgres.GetConnectionString());
+        Environment.SetEnvironmentVariable("ConnectionStrings__Redis", _redis.GetConnectionString());
+        Environment.SetEnvironmentVariable("AutoMigrate", "true");
+        Environment.SetEnvironmentVariable("RateLimit__PerIpPerSecond", "10000");
+        Environment.SetEnvironmentVariable("RateLimit__PerUserPerSecond", "10000");
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Test");
+
+        Factory = new PaymentsLedgerFactory();
 
         // Force startup so AutoMigrate runs.
         _ = Factory.Server;

@@ -7,8 +7,8 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using PaymentsLedger.IntegrationTests.Infrastructure;
 using PaymentsLedger.Infrastructure.Persistence;
+using PaymentsLedger.IntegrationTests.Infrastructure;
 
 namespace PaymentsLedger.IntegrationTests;
 
@@ -75,8 +75,11 @@ public sealed class TransfersFlowTests(LedgerFixture fixture) : IAsyncLifetime
             Content = new StringContent(
                 JsonSerializer.Serialize(new
                 {
-                    fromWalletId = fromId, toWalletId = toId,
-                    amountMinorUnits = 100, currency = "USD", reference = (string?)null,
+                    fromWalletId = fromId,
+                    toWalletId = toId,
+                    amountMinorUnits = 100,
+                    currency = "USD",
+                    reference = (string?)null,
                 }, _json),
                 Encoding.UTF8,
                 "application/json"),
@@ -170,8 +173,11 @@ public sealed class TransfersFlowTests(LedgerFixture fixture) : IAsyncLifetime
             Content = new StringContent(
                 JsonSerializer.Serialize(new
                 {
-                    fromWalletId = from, toWalletId = to,
-                    amountMinorUnits = minor, currency, reference = (string?)null,
+                    fromWalletId = from,
+                    toWalletId = to,
+                    amountMinorUnits = minor,
+                    currency,
+                    reference = (string?)null,
                 }, _json),
                 Encoding.UTF8,
                 "application/json"),

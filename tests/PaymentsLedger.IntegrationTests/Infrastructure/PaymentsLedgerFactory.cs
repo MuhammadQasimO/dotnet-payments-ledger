@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -11,32 +10,21 @@ using PaymentsLedger.Infrastructure.Persistence;
 namespace PaymentsLedger.IntegrationTests.Infrastructure;
 
 /// <summary>
-/// WebApplicationFactory that points the API at Testcontainers-managed Postgres + Redis.
-/// Also strips the OutboxDispatcher (it's not under test here; dedicated tests cover it).
+/// WebApplicationFactory for the Minimal-API host. Connection strings and other
+/// settings are passed in via process env vars (see <see cref="LedgerFixture"/>) so they
+/// land in <c>builder.Configuration</c> before <c>AddInfrastructure</c> reads them —
+/// <c>ConfigureAppConfiguration</c> runs too late for that here.
+/// Also strips the <see cref="OutboxDispatcher"/> hosted service (covered by dedicated tests).
 /// </summary>
-public sealed class PaymentsLedgerFactory(string postgresConnection, string redisConnection)
-    : WebApplicationFactory<Program>
+public sealed class PaymentsLedgerFactory : WebApplicationFactory<Program>
 {
     protected override IHost CreateHost(IHostBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.UseEnvironment("Test");
-        builder.ConfigureAppConfiguration((_, cfg) =>
-        {
-            cfg.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:Ledger"] = postgresConnection,
-                ["ConnectionStrings:Redis"] = redisConnection,
-                ["AutoMigrate"] = "true",
-                ["Webhooks:Endpoint"] = null,
-                ["RateLimit:PerIpPerSecond"] = "10000",
-                ["RateLimit:PerUserPerSecond"] = "10000",
-            });
-        });
 
         builder.ConfigureServices(services =>
         {
-            // Remove the OutboxDispatcher hosted service in tests — covered separately.
             var dispatcher = services.SingleOrDefault(s =>
                 s.ImplementationType == typeof(OutboxDispatcher));
             if (dispatcher is not null)
