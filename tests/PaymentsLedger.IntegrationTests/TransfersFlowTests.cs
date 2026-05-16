@@ -148,7 +148,10 @@ public sealed class TransfersFlowTests(LedgerFixture fixture) : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<LedgerDbContext>();
         var rows = await db.OutboxMessages.AsNoTracking().Where(m => m.EventType == "transfer.posted").ToListAsync();
         rows.Should().NotBeEmpty();
-        rows[0].PayloadJson.Should().Contain("\"amountMinorUnits\":250");
+
+        // Postgres jsonb roundtrips with canonical whitespace and unordered keys — parse structurally.
+        using var payload = JsonDocument.Parse(rows[0].PayloadJson);
+        payload.RootElement.GetProperty("amountMinorUnits").GetInt64().Should().Be(250);
     }
 
     private static async Task<(Guid From, Guid To)> CreateWalletsAsync(HttpClient client, string currency) =>
