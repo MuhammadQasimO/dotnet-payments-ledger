@@ -156,10 +156,12 @@ public sealed class TransfersFlowTests(LedgerFixture fixture) : IAsyncLifetime
 
     private static async Task<Guid> CreateWalletAsync(HttpClient client, string currency)
     {
-        var resp = await client.PostAsJsonAsync(
-            "/api/wallets",
-            new { userId = Guid.NewGuid(), currency },
-            _json);
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/wallets")
+        {
+            Content = JsonContent.Create(new { userId = Guid.NewGuid(), currency }, options: _json),
+        };
+        req.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        var resp = await client.SendAsync(req);
         resp.EnsureSuccessStatusCode();
         var body = await resp.Content.ReadFromJsonAsync<JsonElement>(_json);
         return body.GetProperty("walletId").GetGuid();
